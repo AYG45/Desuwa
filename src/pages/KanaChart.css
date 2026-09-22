@@ -1,0 +1,223 @@
+.chart-page {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.chart-header {
+  margin-bottom: 24px;
+}
+
+.chart-header h1 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.chart-header p {
+  color: var(--text-secondary);
+}
+
+.chart-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+  background: var(--bg-card);
+  padding: 16px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+}
+
+.script-toggle {
+  display: flex;
+  gap: 12px;
+}
+
+.script-toggle .btn {
+  flex: 1;
+  max-width: 200px;
+}
+
+.type-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.type-tab {
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-base);
+}
+
+.type-tab:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.type-tab.active {
+  background: var(--gradient-primary);
+  color: white;
+  border-color: transparent;
+  box-shadow: var(--shadow-sm);
+}
+
+.chart-instructions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+  margin-bottom: 16px;
+  font-style: italic;
+}
+
+.kana-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+}
+
+.kana-grid-combo {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.kana-cell {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm);
+}
+
+.kana-cell:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-primary);
+  box-shadow: var(--shadow-md);
+}
+
+.kana-cell:active {
+  transform: translateY(1px);
+}
+
+.kana-char {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.kana-romaji {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.kana-play-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--bg-tertiary);
+  border: none;
+  color: var(--text-tertiary);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all var(--transition-base);
+}
+
+.kana-cell:hover .kana-play-btn {
+  opacity: 1;
+  color: var(--accent-primary);
+}
+
+/* Empty cells handling for Japanese grid gaps */
+.kana-cell:empty {
+  visibility: hidden;
+}
+
+@media (max-width: 768px) {
+  .chart-page {
+    padding: 16px;
+  }
+  
+  .kana-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+  }
+  
+  .kana-grid-combo {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .kana-char {
+    font-size: 1.8rem;
+  }
+  
+  .kana-play-btn {
+    opacity: 1; /* Always visible on mobile */
+    background: transparent;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart-page {
+    padding: 12px;
+  }
+  .kana-grid {
+    gap: 4px;
+  }
+  .kana-cell {
+    padding: 8px 4px;
+  }
+  .kana-char {
+    font-size: 1.4rem;
+  }
+  .kana-romaji {
+    font-size: 0.75rem;
+  }
+  .chart-header {
+    margin-bottom: 16px;
+  }
+  .chart-header h1 {
+    font-size: 1.6rem;
+    margin-bottom: 2px;
+  }
+  .chart-header p {
+    font-size: 0.85rem;
+  }
+  .type-tab {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+  .kana-play-btn {
+    display: none; /* Hide redundant button on mobile since cell is clickable */
+  }
+  .type-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .type-tabs {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}

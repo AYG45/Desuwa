@@ -1,0 +1,115 @@
+/* ============================================
+   StatsCard — Dashboard stat display
+   ============================================ */
+
+.stats-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  transition: all var(--transition-base);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: relative;
+  overflow: hidden;
+}
+
+.stats-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.stats-card:hover {
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.stats-card:hover::before {
+  opacity: 1;
+  background: var(--border-accent) !important;
+}
+
+[data-theme="light"] .stats-card:hover::before {
+  background: var(--accent-primary) !important;
+}
+
+.stats-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  background: var(--bg-tertiary) !important;
+}
+
+.stats-card-content {
+  flex: 1;
+}
+
+.stats-card-label {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.stats-card-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.stats-card-change {
+  font-size: 0.72rem;
+  font-weight: 600;
+  margin-top: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+.stats-card-change.positive {
+  color: var(--success);
+  background: var(--success-bg);
+}
+
+.stats-card-change.negative {
+  color: var(--error);
+  background: var(--error-bg);
+}
+
+@media (max-width: 480px) {
+  .stats-card {
+    padding: 12px;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+  }
+  .stats-card-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+  }
+  .stats-card-label {
+    display: none;
+  }
+  .stats-card-value {
+    font-size: 1.2rem;
+  }
+}

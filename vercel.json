@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/jisho/:match*",
+      "destination": "https://jisho.org/api/v1/:match*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/"
     }

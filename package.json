@@ -13,6 +13,8 @@
     "vite": "^8.3.0"
   },
   "dependencies": {
+    "hanzi-writer": "^3.7.3",
+    "hanzi-writer-data-jp": "^0.0.2",
     "react-router-dom": "^7.18.4"
   }
 }

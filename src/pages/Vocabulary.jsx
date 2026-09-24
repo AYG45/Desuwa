@@ -1,8 +1,10 @@
 import { useState, useMemo } from 'react';
 import { vocabulary, vocabCategories } from '../data/vocabulary';
-import { Search, MessageCircle, User, Star, Tent, Calendar, Play, Volume2 } from '../components/Icons';
+import { searchJisho } from '../services/jisho';
+import { Search, MessageCircle, User, Star, Tent, Calendar, Play, Volume2, BookMarked, Book } from '../components/Icons';
 import { playAudio } from '../utils/tts';
 import { formatJapanese } from '../utils/helpers';
+import DisplayToggle from '../components/DisplayToggle';
 import './Vocabulary.css';
 
 const getCategoryIcon = (key) => {
@@ -18,10 +20,15 @@ const getCategoryIcon = (key) => {
   }
 };
 
-export default function Vocabulary({ progress, onBookmark, displayMode }) {
+export default function Vocabulary({ progress, onBookmark, displayMode, setDisplayMode }) {
   const [search, setSearch] = useState('');
-  const [category, setCategory] = useState('all');
   const [expandedIndex, setExpandedIndex] = useState(null);
+
+  // Jisho Dictionary states
+  const [jishoResults, setJishoResults] = useState([]);
+  const [jishoLoading, setJishoLoading] = useState(false);
+  const [jishoError, setJishoError] = useState(null);
+  const [hasSearchedJisho, setHasSearchedJisho] = useState(false);
 
   const filteredVocab = useMemo(() => {
     return vocabulary.filter((item) => {
@@ -31,56 +38,117 @@ export default function Vocabulary({ progress, onBookmark, displayMode }) {
         item.reading.toLowerCase().includes(search.toLowerCase()) ||
         item.meaning.toLowerCase().includes(search.toLowerCase());
 
-      const matchesCategory = category === 'all' || item.category === category;
-
-      return matchesSearch && matchesCategory;
+      return matchesSearch;
     });
-  }, [search, category]);
+  }, [search]);
 
   const toggleExpand = (index) => {
     setExpandedIndex(expandedIndex === index ? null : index);
   };
 
+  const handleSearchJisho = async (e) => {
+    e.preventDefault();
+    if (!search.trim()) return;
+
+    setJishoLoading(true);
+    setJishoError(null);
+    setHasSearchedJisho(true);
+    
+    try {
+      const data = await searchJisho(search);
+      setJishoResults(data);
+    } catch (err) {
+      setJishoError('Failed to fetch dictionary results. Please try again.');
+    } finally {
+      setJishoLoading(false);
+    }
+  };
+
+  const renderJishoResult = (item) => {
+    const displayWord = formatJapanese(item, displayMode);
+    const audioText = item.word || item.reading;
+    const isBookmarked = progress?.bookmarkedVocab?.includes(audioText);
+
+    return (
+      <div key={item.id} className="dictionary-card">
+        <div className="dictionary-card-header">
+          <div className="dictionary-card-jp">
+            <h2>{displayWord}</h2>
+            {displayMode === 'kanji' && item.word && item.word !== item.reading && (
+              <span className="dictionary-card-reading">{item.reading}</span>
+            )}
+          </div>
+          <div className="dictionary-card-actions">
+            <button 
+              className="dictionary-play-btn" 
+              onClick={() => playAudio(audioText)}
+              aria-label="Play pronunciation"
+            >
+              <Volume2 size={20} />
+            </button>
+            {onBookmark && (
+              <button 
+                className={`dictionary-bookmark-btn ${isBookmarked ? 'active' : ''}`}
+                onClick={() => onBookmark(audioText)}
+                aria-label="Bookmark word"
+              >
+                <BookMarked size={20} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="dictionary-card-meta">
+          {item.isCommon && <span className="tag tag-common">Common</span>}
+          {item.jlpt && <span className="tag tag-jlpt">{item.jlpt}</span>}
+        </div>
+
+        <div className="dictionary-card-meanings">
+          <ol>
+            {item.meanings.map((meaning, idx) => (
+              <li key={idx}>{meaning}</li>
+            ))}
+          </ol>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="vocab-page page-enter" id="vocab-page">
-      <div className="vocab-header">
-        <h1>Vocabulary</h1>
-        <p>Browse and study JLPT N5 vocabulary words</p>
+      <div className="vocab-header-wrapper">
+        <div className="vocab-header">
+          <h1>Vocabulary & Dictionary</h1>
+          <p>Browse JLPT N5 vocabulary or search Jisho.org dynamically</p>
+        </div>
+        <DisplayToggle displayMode={displayMode} setDisplayMode={setDisplayMode} inline={true} />
       </div>
 
       {/* Search */}
       <div className="vocab-search-bar">
-        <div className="vocab-search-wrapper">
-          <span className="vocab-search-icon"><Search size={16} /></span>
-          <input
-            type="text"
-            className="vocab-search-input"
-            placeholder="Search in Japanese, romaji, or English..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            id="vocab-search"
-          />
-        </div>
+        <form className="vocab-search-form" onSubmit={handleSearchJisho}>
+          <div className="vocab-search-wrapper dictionary-search-wrapper">
+            <span className="vocab-search-icon"><Search size={16} /></span>
+            <input
+              type="text"
+              className="vocab-search-input dictionary-search-input"
+              placeholder="Search in Japanese, romaji, or English..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setHasSearchedJisho(false); // Reset Jisho search state on new typing
+                setJishoResults([]);
+              }}
+              id="vocab-search"
+            />
+            <button type="submit" className="dictionary-search-btn" disabled={jishoLoading}>
+              {jishoLoading ? 'Searching...' : 'Search'}
+            </button>
+          </div>
+        </form>
       </div>
 
-      {/* Category Filters */}
-      <div className="vocab-categories">
-        <button
-          className={`vocab-category-btn ${category === 'all' ? 'active' : ''}`}
-          onClick={() => setCategory('all')}
-        >
-          All
-        </button>
-        {Object.entries(vocabCategories).map(([key, cat]) => (
-          <button
-            key={key}
-            className={`vocab-category-btn ${category === key ? 'active' : ''}`}
-            onClick={() => setCategory(key)}
-          >
-            {getCategoryIcon(key)} {cat.label}
-          </button>
-        ))}
-      </div>
+
 
       {/* Count */}
       <div className="vocab-count">
@@ -158,7 +226,15 @@ export default function Vocabulary({ progress, onBookmark, displayMode }) {
           );
         })}
 
-        {filteredVocab.length === 0 && (
+        {filteredVocab.length === 0 && search && !hasSearchedJisho && (
+          <div className="empty-state">
+            <div className="empty-state-icon"><Search size={48} /></div>
+            <h3>No local words found</h3>
+            <p>Press Search to look up "{search}" in the online dictionary</p>
+          </div>
+        )}
+
+        {filteredVocab.length === 0 && !search && (
           <div className="empty-state">
             <div className="empty-state-icon"><Search size={48} /></div>
             <h3>No words found</h3>
@@ -166,6 +242,41 @@ export default function Vocabulary({ progress, onBookmark, displayMode }) {
           </div>
         )}
       </div>
+
+      {/* Dictionary Results Section */}
+      {(hasSearchedJisho || jishoLoading || jishoError) && (
+        <div className="dictionary-results-section">
+          <div className="dictionary-section-header">
+            <h2>Online Dictionary Results</h2>
+            <hr />
+          </div>
+          
+          <div className="dictionary-results">
+            {jishoLoading && (
+              <div className="dictionary-loading">
+                <div className="loading-spinner"></div>
+                <p>Fetching results...</p>
+              </div>
+            )}
+
+            {jishoError && <div className="dictionary-error">{jishoError}</div>}
+
+            {!jishoLoading && !jishoError && jishoResults.length > 0 && (
+              <div className="dictionary-cards">
+                {jishoResults.map(renderJishoResult)}
+              </div>
+            )}
+
+            {!jishoLoading && !jishoError && hasSearchedJisho && jishoResults.length === 0 && (
+              <div className="dictionary-empty">
+                <Search size={48} />
+                <h3>No dictionary words found</h3>
+                <p>No results found on Jisho for "{search}".</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

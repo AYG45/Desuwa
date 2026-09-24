@@ -10,7 +10,6 @@ const navItems = [
   { path: '/learn', icon: <Book size={20} />, label: 'Learn' },
   { path: '/practice', icon: <Target size={20} />, label: 'Practice' },
   { path: '/chart', icon: <LayoutGrid size={20} />, label: 'Kana Chart' },
-  { path: '/dictionary', icon: <SearchIcon size={20} />, label: 'Dictionary' },
   { path: '/vocabulary', icon: <BookOpen size={20} />, label: 'Vocabulary' },
   { path: '/profile', icon: <User size={20} />, label: 'Profile' },
 ];

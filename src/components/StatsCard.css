@@ -97,9 +97,9 @@
 @media (max-width: 480px) {
   .stats-card {
     padding: 12px;
-    gap: 12px;
+    gap: 8px;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
   }
   .stats-card-icon {
     width: 36px;
@@ -107,9 +107,10 @@
     font-size: 1.1rem;
   }
   .stats-card-label {
-    display: none;
+    font-size: 0.65rem;
+    margin-bottom: 2px;
   }
   .stats-card-value {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
   }
 }

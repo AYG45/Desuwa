@@ -1,14 +1,16 @@
 import { useState, useCallback } from 'react';
 import QuizCard from '../components/QuizCard';
+import StrokePractice from '../components/StrokePractice';
 import { hiraganaBasic } from '../data/hiragana';
 import { katakanaBasic } from '../data/katakana';
 import { shuffleArray, getRandomSubset, getTodayStr } from '../utils/helpers';
-import { Rocket, RefreshCw } from '../components/Icons';
+import { Rocket, RefreshCw, Pencil } from '../components/Icons';
 import './Practice.css';
 
 const QUIZ_MODES = [
   { id: 'choice', icon: '', title: 'Multiple Choice', desc: 'Pick the correct reading' },
   { id: 'typing', icon: '', title: 'Type It', desc: 'Type the romaji answer' },
+  { id: 'strokes', icon: '筆', title: 'Practice Strokes', desc: 'Trace stroke order' },
 ];
 
 const CHAR_SETS = [
@@ -139,7 +141,8 @@ export default function Practice({ progress, onQuizComplete }) {
             ))}
           </div>
 
-          {/* Setup Panel */}
+          {/* Setup Panel — only show for quiz modes, not strokes */}
+          {mode !== 'strokes' && (
           <div className="practice-setup">
             <div className="practice-setup-row">
               <span className="practice-setup-label">Characters</span>
@@ -177,6 +180,12 @@ export default function Practice({ progress, onQuizComplete }) {
               <Rocket size={20} style={{marginRight: '8px'}} /> Start Quiz
             </button>
           </div>
+          )}
+
+          {/* Stroke Practice */}
+          {mode === 'strokes' && (
+            <StrokePractice />
+          )}
         </>
       )}
 

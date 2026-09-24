@@ -7,7 +7,6 @@ import CharacterGrid from './pages/CharacterGrid';
 import KanaChart from './pages/KanaChart';
 import Practice from './pages/Practice';
 import Vocabulary from './pages/Vocabulary';
-import Dictionary from './pages/Dictionary';
 import Profile from './pages/Profile';
 import { getStorageData, setStorageData, defaultProgress, getTodayStr } from './utils/helpers';
 import './App.css';
@@ -159,17 +158,6 @@ export default function App() {
                   progress={progress}
                   onBookmark={handleBookmark}
                   displayMode={displayMode}
-                />
-              }
-            />
-            <Route
-              path="/dictionary"
-              element={
-                <Dictionary
-                  progress={progress}
-                  onBookmark={handleBookmark}
-                  displayMode={displayMode}
-                  setDisplayMode={setDisplayMode}
                 />
               }
             />

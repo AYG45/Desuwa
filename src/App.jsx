@@ -8,7 +8,13 @@ import KanaChart from './pages/KanaChart';
 import Practice from './pages/Practice';
 import Vocabulary from './pages/Vocabulary';
 import Profile from './pages/Profile';
+import Review from './pages/Review';
+import Lessons from './pages/Lessons';
+import LessonView from './pages/LessonView';
+import Grammar from './pages/Grammar';
 import { getStorageData, setStorageData, defaultProgress, getTodayStr } from './utils/helpers';
+import { createSRSItem } from './utils/srs';
+import ScrollToTop from './components/ScrollToTop';
 import './App.css';
 
 export default function App() {
@@ -62,9 +68,16 @@ export default function App() {
 
         if (prev[key].includes(char)) return prev;
 
+        const currentSRS = prev.srsItems || [];
+        const itemId = `${type}-${char}`;
+        const newSRS = currentSRS.some((i) => i.id === itemId)
+          ? currentSRS
+          : [...currentSRS, createSRSItem(itemId, type, char)];
+
         return {
           ...prev,
           [key]: [...prev[key], char],
+          srsItems: newSRS,
           xp: prev.xp + 5,
           lessonsCompleted: prev.lessonsCompleted + 1,
         };
@@ -98,6 +111,65 @@ export default function App() {
     });
   }, []);
 
+  // SRS Review item update
+  const handleReviewItem = useCallback((updatedItem) => {
+    trackActivity();
+    setProgress((prev) => {
+      const items = (prev.srsItems || []).map((item) =>
+        item.id === updatedItem.id ? updatedItem : item
+      );
+      if (!items.find((i) => i.id === updatedItem.id)) {
+        items.push(updatedItem);
+      }
+      return {
+        ...prev,
+        srsItems: items,
+        xp: prev.xp + 5,
+      };
+    });
+  }, [trackActivity]);
+
+  // Add item to SRS
+  const handleAddSRSItem = useCallback((newItem) => {
+    setProgress((prev) => {
+      const currentItems = prev.srsItems || [];
+      if (currentItems.some((i) => i.id === newItem.id)) return prev;
+      return {
+        ...prev,
+        srsItems: [...currentItems, newItem],
+      };
+    });
+  }, []);
+
+  // Complete a guided lesson
+  const handleCompleteLesson = useCallback((lessonId, track) => {
+    trackActivity();
+    setProgress((prev) => {
+      const completed = prev.completedLessons || [];
+      if (completed.includes(lessonId)) return prev;
+      return {
+        ...prev,
+        completedLessons: [...completed, lessonId],
+        xp: prev.xp + 20,
+        lessonsCompleted: prev.lessonsCompleted + 1,
+      };
+    });
+  }, [trackActivity]);
+
+  // Complete a grammar lesson
+  const handleCompleteGrammar = useCallback((grammarId) => {
+    trackActivity();
+    setProgress((prev) => {
+      const completed = prev.completedGrammar || [];
+      if (completed.includes(grammarId)) return prev;
+      return {
+        ...prev,
+        completedGrammar: [...completed, grammarId],
+        xp: prev.xp + 15,
+      };
+    });
+  }, [trackActivity]);
+
   // Reset
   const handleResetProgress = useCallback(() => {
     setProgress(defaultProgress);
@@ -105,6 +177,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <div className="app-layout">
         {/* Ambient Background */}
         <div className="ambient-bg" aria-hidden="true">
@@ -124,8 +197,46 @@ export default function App() {
               element={<Home progress={progress} displayMode={displayMode} />}
             />
             <Route
+              path="/lessons"
+              element={<Lessons progress={progress} />}
+            />
+            <Route
+              path="/lessons/:track/:lessonId"
+              element={
+                <LessonView
+                  progress={progress}
+                  onCompleteLesson={handleCompleteLesson}
+                  onAddSRSItem={handleAddSRSItem}
+                />
+              }
+            />
+            <Route
+              path="/grammar"
+              element={
+                <Grammar
+                  progress={progress}
+                  onCompleteGrammar={handleCompleteGrammar}
+                />
+              }
+            />
+            <Route
+              path="/review"
+              element={
+                <Review
+                  progress={progress}
+                  onReviewItem={handleReviewItem}
+                />
+              }
+            />
+            <Route
               path="/learn"
-              element={<Learn progress={progress} displayMode={displayMode} />}
+              element={
+                <Learn
+                  progress={progress}
+                  displayMode={displayMode}
+                  onLearnCharacter={handleLearnCharacter}
+                />
+              }
             />
             <Route
               path="/learn/:type"

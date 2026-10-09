@@ -1,21 +1,32 @@
 import { NavLink } from 'react-router-dom';
-import { Home, Book, Target, BookOpen, User, Tent, LayoutGrid, Search as SearchIcon } from './Icons';
+import { Home, Sparkles, Rocket, BookOpen, Target, User, Tent } from './Icons';
 import ThemeToggle from './ThemeToggle';
 import DisplayToggle from './DisplayToggle';
 import { getLevel } from '../utils/helpers';
+import { getDueCount } from '../utils/srs';
 import './Navbar.css';
-
-const navItems = [
-  { path: '/', icon: <Home size={20} />, label: 'Home' },
-  { path: '/learn', icon: <Book size={20} />, label: 'Learn' },
-  { path: '/practice', icon: <Target size={20} />, label: 'Practice' },
-  { path: '/chart', icon: <LayoutGrid size={20} />, label: 'Kana Chart' },
-  { path: '/vocabulary', icon: <BookOpen size={20} />, label: 'Vocabulary' },
-  { path: '/profile', icon: <User size={20} />, label: 'Profile' },
-];
 
 export default function Navbar({ progress, displayMode, setDisplayMode }) {
   const { level, progress: levelProgress } = getLevel(progress.xp);
+  const dueReviews = getDueCount(progress.srsItems || []);
+
+  const navItems = [
+    { path: '/', icon: <Home size={20} />, label: 'Home' },
+    { path: '/lessons', icon: <Sparkles size={20} />, label: 'Lessons' },
+    { path: '/review', icon: <Rocket size={20} />, label: 'Review', badge: dueReviews > 0 ? dueReviews : null },
+    { path: '/grammar', icon: <BookOpen size={20} />, label: 'Grammar' },
+    { path: '/practice', icon: <Target size={20} />, label: 'Practice' },
+    { path: '/profile', icon: <User size={20} />, label: 'Profile' },
+  ];
+
+  const mobileNavItems = [
+    { path: '/', icon: <Home size={20} />, label: 'Home' },
+    { path: '/lessons', icon: <Sparkles size={20} />, label: 'Lessons' },
+    { path: '/review', icon: <Rocket size={20} />, label: 'Review', badge: dueReviews > 0 ? dueReviews : null },
+    { path: '/grammar', icon: <BookOpen size={20} />, label: 'Grammar' },
+    { path: '/practice', icon: <Target size={20} />, label: 'Practice' },
+    { path: '/profile', icon: <User size={20} />, label: 'Profile' },
+  ];
 
   return (
     <>
@@ -32,7 +43,7 @@ export default function Navbar({ progress, displayMode, setDisplayMode }) {
         </div>
 
         <nav className="sidebar-nav">
-          <div className="nav-section-label">Menu</div>
+          <div className="nav-section-label">Study Path</div>
           {navItems.map((item) => (
             <NavLink
               key={item.path}
@@ -44,7 +55,10 @@ export default function Navbar({ progress, displayMode, setDisplayMode }) {
               id={`nav-${item.label.toLowerCase()}`}
             >
               <span className="nav-link-icon">{item.icon}</span>
-              {item.label}
+              <span>{item.label}</span>
+              {item.badge !== null && item.badge !== undefined && (
+                <span className="nav-link-badge">{item.badge}</span>
+              )}
             </NavLink>
           ))}
         </nav>
@@ -68,7 +82,7 @@ export default function Navbar({ progress, displayMode, setDisplayMode }) {
 
       {/* Mobile Bottom Nav */}
       <nav className="bottom-nav" id="bottom-nav">
-        {navItems.map((item) => (
+        {mobileNavItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
@@ -77,7 +91,27 @@ export default function Navbar({ progress, displayMode, setDisplayMode }) {
               `bottom-nav-link ${isActive ? 'active' : ''}`
             }
           >
-            <span className="bottom-nav-link-icon">{item.icon}</span>
+            <span className="bottom-nav-link-icon" style={{ position: 'relative' }}>
+              {item.icon}
+              {item.badge !== null && item.badge !== undefined && (
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: '-4px',
+                    right: '-8px',
+                    background: '#ff6b6b',
+                    color: '#fff',
+                    fontSize: '10px',
+                    fontWeight: 800,
+                    borderRadius: '99px',
+                    padding: '1px 5px',
+                    lineHeight: '1.2',
+                  }}
+                >
+                  {item.badge}
+                </span>
+              )}
+            </span>
             <span className="bottom-nav-link-text">{item.label}</span>
           </NavLink>
         ))}

@@ -4,12 +4,15 @@ import { hiraganaBasic } from '../data/hiragana';
 import { katakanaBasic } from '../data/katakana';
 import { kanjiN5 } from '../data/kanji';
 import { getLevel, calculateStreak, formatNumber } from '../utils/helpers';
-import { Sprout, Target, Book, BookOpen, Flame, Star, Trophy, Rocket, User, Pencil, CheckCircle, Calendar, Trash2 } from '../components/Icons';
+import { Sprout, Target, Book, BookOpen, Flame, Star, Trophy, Rocket, User, Pencil, CheckCircle, Calendar, Trash2, Sparkles } from '../components/Icons';
 import ThemeToggle from '../components/ThemeToggle';
 import './Profile.css';
 
 const ACHIEVEMENTS = [
   { id: 'first_lesson', icon: <Sprout size={24} color="#2ed573" />, name: 'First Steps', desc: 'Complete your first lesson', check: (p) => p.lessonsCompleted >= 1 },
+  { id: 'srs_first', icon: <Rocket size={24} color="#e94560" />, name: 'Memory Builder', desc: 'Add 5 items to SRS review queue', check: (p) => (p.srsItems || []).length >= 5 },
+  { id: 'grammar_first', icon: <BookOpen size={24} color="#3498db" />, name: 'Grammar Student', desc: 'Master your first grammar rule', check: (p) => (p.completedGrammar || []).length >= 1 },
+  { id: 'lesson_first', icon: <Sparkles size={24} color="#ffd93d" />, name: 'Guided Learner', desc: 'Complete a guided lesson track', check: (p) => (p.completedLessons || []).length >= 1 },
   { id: 'hiragana_10', icon: <Pencil size={24} color="#e94560" />, name: 'Hiragana Learner', desc: 'Learn 10 hiragana', check: (p) => p.learnedHiragana.length >= 10 },
   { id: 'hiragana_all', icon: <Book size={24} color="#e94560" />, name: 'Hiragana Master', desc: 'Learn all 46 hiragana', check: (p) => p.learnedHiragana.length >= 46 },
   { id: 'katakana_10', icon: <Pencil size={24} color="#3498db" />, name: 'Katakana Learner', desc: 'Learn 10 katakana', check: (p) => p.learnedKatakana.length >= 10 },
@@ -166,6 +169,38 @@ export default function Profile({ progress, onResetProgress }) {
             value={progress.learnedKanji.length}
             max={kanjiN5.length}
             color="#3498db"
+          />
+        </div>
+        <div className="profile-progress-card">
+          <div className="profile-progress-card-header">
+            <span className="profile-progress-card-icon">
+              <Sparkles size={20} color="#ffa502" />
+            </span>
+            <span className="profile-progress-card-title">Guided Lessons</span>
+            <span className="profile-progress-card-count">
+              {(progress.completedLessons || []).length}/20
+            </span>
+          </div>
+          <ProgressBar
+            value={(progress.completedLessons || []).length}
+            max={20}
+            color="#ffa502"
+          />
+        </div>
+        <div className="profile-progress-card">
+          <div className="profile-progress-card-header">
+            <span className="profile-progress-card-icon">
+              <BookOpen size={20} color="#2ed573" />
+            </span>
+            <span className="profile-progress-card-title">N5 Grammar</span>
+            <span className="profile-progress-card-count">
+              {(progress.completedGrammar || []).length}/13
+            </span>
+          </div>
+          <ProgressBar
+            value={(progress.completedGrammar || []).length}
+            max={13}
+            color="#2ed573"
           />
         </div>
       </div>

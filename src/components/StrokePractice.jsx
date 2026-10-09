@@ -508,7 +508,7 @@ export default function StrokePractice() {
               {mode === 'quiz' && quizState === 'complete' && (
                 <div className="stroke-quiz-result">
                   <div className="stroke-quiz-complete-msg">
-                    {mistakeCount === 0 ? '✨ Perfect!' : mistakeCount <= 2 ? '👍 Good job!' : '💪 Keep practicing!'}
+                    {mistakeCount === 0 ? 'Perfect!' : mistakeCount <= 2 ? 'Good job!' : 'Keep practicing!'}
                   </div>
                   <div className="stroke-quiz-summary">
                     {totalStrokes} strokes · {mistakeCount} mistake{mistakeCount !== 1 ? 's' : ''}

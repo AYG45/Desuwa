@@ -104,6 +104,9 @@ export const defaultProgress = {
   learnedKanji: [],
   bookmarkedVocab: [],
   achievements: [],
+  srsItems: [],
+  completedLessons: [],
+  completedGrammar: [],
 };
 
 /* Appended logic to helpers.js */

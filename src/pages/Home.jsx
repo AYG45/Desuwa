@@ -1,18 +1,20 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import StatsCard from '../components/StatsCard';
-import { Flame, Pencil, Target, MessageCircle, Play, Book, Star, Volume2 } from '../components/Icons';
+import { Flame, Pencil, Target, MessageCircle, Play, Book, Star, Volume2, Sparkles, Rocket, BookOpen, LayoutGrid, Compass, ChevronRight } from '../components/Icons';
 import { kanjiN5 } from '../data/kanji';
 import { vocabulary } from '../data/vocabulary';
 import { hiraganaBasic } from '../data/hiragana';
 import { katakanaBasic } from '../data/katakana';
 import { getLevel, calculateStreak, formatJapanese } from '../utils/helpers';
+import { getDueCount } from '../utils/srs';
 import { playAudio } from '../utils/tts';
 import './Home.css';
 
 export default function Home({ progress, displayMode }) {
   const { level } = getLevel(progress.xp);
   const streak = calculateStreak(progress.activeDates);
+  const dueReviews = getDueCount(progress.srsItems || []);
 
   // Daily spotlight - use day of year as index for consistent daily pick
   const dayOfYear = Math.floor(
@@ -48,17 +50,32 @@ export default function Home({ progress, displayMode }) {
               Continue your <span>Japanese</span> journey
             </h1>
             <p className="home-hero-subtitle">
-              {streak > 0
+              {dueReviews > 0
+                ? `You have ${dueReviews} SRS reviews ready today. Review them to build permanent memory!`
+                : streak > 0
                 ? `Amazing! You're on a ${streak}-day streak. Keep going!`
-                : 'Start learning today and build your streak!'}
+                : 'Start learning today with structured lessons and spaced repetition!'}
             </p>
             <div className="home-hero-actions">
-              <Link to="/learn" className="btn btn-primary btn-lg" id="hero-learn-btn">
-                <Book size={20} /> Start Learning
-              </Link>
-              <Link to="/practice" className="btn btn-secondary btn-lg" id="hero-practice-btn">
-                <Target size={20} /> Practice
-              </Link>
+              {dueReviews > 0 ? (
+                <>
+                  <Link to="/review" className="btn btn-primary btn-lg" id="hero-review-btn">
+                    <Rocket size={20} /> Review Deck ({dueReviews} Due)
+                  </Link>
+                  <Link to="/lessons" className="btn btn-secondary btn-lg" id="hero-lessons-btn">
+                    <Sparkles size={20} /> Guided Lessons
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link to="/lessons" className="btn btn-primary btn-lg" id="hero-lessons-btn">
+                    <Sparkles size={20} /> Start Guided Lessons
+                  </Link>
+                  <Link to="/grammar" className="btn btn-secondary btn-lg" id="hero-grammar-btn">
+                    <BookOpen size={20} /> Learn Grammar
+                  </Link>
+                </>
+              )}
             </div>
           </div>
           <div className="home-hero-visual">
@@ -66,6 +83,24 @@ export default function Home({ progress, displayMode }) {
           </div>
         </div>
       </section>
+
+      {/* SRS Due Banner if reviews waiting */}
+      {dueReviews > 0 && (
+        <section className="home-srs-banner">
+          <div className="srs-banner-content">
+            <div className="srs-banner-icon">
+              <Rocket size={28} color="#e94560" />
+            </div>
+            <div className="srs-banner-text">
+              <h3>Spaced Repetition Reviews Ready</h3>
+              <p>You have <strong>{dueReviews} items</strong> scheduled for review. Retain what you learned!</p>
+            </div>
+          </div>
+          <Link to="/review" className="btn btn-primary">
+            Review Now
+          </Link>
+        </section>
+      )}
 
       {/* Stats */}
       <section className="home-stats">
@@ -82,16 +117,16 @@ export default function Home({ progress, displayMode }) {
           color="#e94560"
         />
         <StatsCard
+          icon={<Rocket size={24} color="var(--accent-secondary)" />}
+          label="SRS Items"
+          value={(progress.srsItems || []).length}
+          color="#3498db"
+        />
+        <StatsCard
           icon={<Pencil size={24} color="var(--accent-secondary)" />}
           label="Characters Learned"
           value={totalLearned}
           color="#7c5cbf"
-        />
-        <StatsCard
-          icon={<Target size={24} color="var(--accent-secondary)" />}
-          label="Accuracy"
-          value={`${accuracy}%`}
-          color="#2ed573"
         />
       </section>
 
@@ -169,35 +204,118 @@ export default function Home({ progress, displayMode }) {
       {/* Quick Actions */}
       <section className="home-quick-actions">
         <div className="section-header">
-          <h2>Quick Start</h2>
-          <p>Jump into a learning activity</p>
+          <h2>Learning Modules</h2>
+          <p>Structured tracks to guide you from zero to JLPT N5</p>
         </div>
         <div className="quick-actions-grid">
-          <Link to="/learn" className="quick-action-card" id="qa-hiragana">
-            <span className="quick-action-icon">あ</span>
+          <Link to="/lessons" className="quick-action-card" id="qa-lessons">
+            <span className="quick-action-icon"><Sparkles size={26} color="#ffa502" /></span>
             <div className="quick-action-content">
-              <div className="quick-action-title">Hiragana</div>
+              <div className="quick-action-title">Guided Lessons</div>
               <div className="quick-action-desc">
-                {progress.learnedHiragana.length}/{hiraganaBasic.length} learned
+                {(progress.completedLessons || []).length} lessons finished · Step-by-step
               </div>
             </div>
           </Link>
-          <Link to="/learn" className="quick-action-card" id="qa-katakana">
-            <span className="quick-action-icon">ア</span>
+          <Link to="/review" className="quick-action-card" id="qa-review">
+            <span className="quick-action-icon"><Rocket size={26} color="#e94560" /></span>
             <div className="quick-action-content">
-              <div className="quick-action-title">Katakana</div>
+              <div className="quick-action-title">SRS Review Deck</div>
               <div className="quick-action-desc">
-                {progress.learnedKatakana.length}/{katakanaBasic.length} learned
+                {dueReviews > 0 ? `${dueReviews} reviews due now!` : 'Spaced repetition queue'}
+              </div>
+            </div>
+          </Link>
+          <Link to="/grammar" className="quick-action-card" id="qa-grammar">
+            <span className="quick-action-icon"><BookOpen size={26} color="#3498db" /></span>
+            <div className="quick-action-content">
+              <div className="quick-action-title">N5 Grammar</div>
+              <div className="quick-action-desc">
+                {(progress.completedGrammar || []).length}/13 mastered · Rules & examples
               </div>
             </div>
           </Link>
           <Link to="/practice" className="quick-action-card" id="qa-quiz">
-            <span className="quick-action-icon"><Play size={24} /></span>
+            <span className="quick-action-icon"><Play size={26} color="#2ed573" /></span>
             <div className="quick-action-content">
-              <div className="quick-action-title">Quick Quiz</div>
+              <div className="quick-action-title">Quiz & Practice</div>
               <div className="quick-action-desc">
-                Test your knowledge
+                Multiple-choice & typing tests
               </div>
+            </div>
+          </Link>
+        </div>
+      </section>
+
+      {/* Study Tools & Reference (JLPT Levels, Chart, Vocabulary) */}
+      <section className="home-reference-section">
+        <div className="section-header">
+          <h2>Study Tools & Reference</h2>
+          <p>JLPT curriculum, complete kana chart, and vocabulary dictionary</p>
+        </div>
+        <div className="reference-cards-grid">
+          <Link to="/learn" className="reference-card" id="ref-jlpt">
+            <div className="reference-card-icon-wrap" style={{ background: 'rgba(233, 69, 96, 0.15)', color: '#e94560' }}>
+              <Book size={24} />
+            </div>
+            <div className="reference-card-body">
+              <div className="reference-card-top">
+                <h3>JLPT Levels</h3>
+                <span className="reference-badge">N5 — N1</span>
+              </div>
+              <p>JLPT curriculum divided from N5 to N1 with dedicated Kanji and Grammar for each level.</p>
+              <div className="reference-card-meta">
+                <span>N5 to N1</span>
+                <span>•</span>
+                <span>Kanji Hub</span>
+                <span>•</span>
+                <span>Grammar Hub</span>
+              </div>
+            </div>
+            <div className="reference-card-arrow">
+              <ChevronRight size={20} />
+            </div>
+          </Link>
+
+          <Link to="/chart" className="reference-card" id="ref-chart">
+            <div className="reference-card-icon-wrap" style={{ background: 'rgba(52, 152, 219, 0.15)', color: '#3498db' }}>
+              <LayoutGrid size={24} />
+            </div>
+            <div className="reference-card-body">
+              <div className="reference-card-top">
+                <h3>Kana Chart</h3>
+                <span className="reference-badge">Interactive</span>
+              </div>
+              <p>Complete Japanese syllabary table with standard sounds, dakuten, and combinations.</p>
+              <div className="reference-card-meta">
+                <span>Audio Playback</span>
+                <span>•</span>
+                <span>Romaji Table</span>
+              </div>
+            </div>
+            <div className="reference-card-arrow">
+              <ChevronRight size={20} />
+            </div>
+          </Link>
+
+          <Link to="/vocabulary" className="reference-card" id="ref-vocabulary">
+            <div className="reference-card-icon-wrap" style={{ background: 'rgba(46, 213, 115, 0.15)', color: '#2ed573' }}>
+              <Compass size={24} />
+            </div>
+            <div className="reference-card-body">
+              <div className="reference-card-top">
+                <h3>Vocabulary</h3>
+                <span className="reference-badge">{(progress.bookmarkedVocab || []).length} saved</span>
+              </div>
+              <p>JLPT N5 word bank with English search, context examples, and bookmarks.</p>
+              <div className="reference-card-meta">
+                <span>Core N5 Words</span>
+                <span>•</span>
+                <span>Search & Audio</span>
+              </div>
+            </div>
+            <div className="reference-card-arrow">
+              <ChevronRight size={20} />
             </div>
           </Link>
         </div>
